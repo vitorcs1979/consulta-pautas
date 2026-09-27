@@ -299,7 +299,7 @@
       const res = await fetch(state.url + '/rest/v1/pretopauta?idpauta=eq.' + idpauta, {
         method: 'PATCH',
         headers: headers({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
-        body: JSON.stringify({ idsolicitante: VITOR_ID_SOLICITANTE, avisarpreto: false }),
+        body: JSON.stringify({ idsolicitante: VITOR_ID_SOLICITANTE }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -382,7 +382,7 @@
     box.innerHTML = '<div class="loading-report">Carregando…</div>';
     try {
       const today = todayISO();
-      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&proximadata=lte.' + today + '&order=proximadata.asc', { headers: headers() });
+      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&idsolicitante=eq.' + MEU_ID_SOLICITANTE + '&proximadata=lte.' + today + '&order=proximadata.asc', { headers: headers() });
       const data = await res.json();
       if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
       renderPendList(box, data);
@@ -410,7 +410,7 @@
     const box = el('listaResponsavel');
     box.innerHTML = '<div class="loading-report">Carregando…</div>';
     try {
-      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&idresponsavel=eq.' + idresponsavel + '&order=proximadata.asc', { headers: headers() });
+      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&idsolicitante=eq.' + MEU_ID_SOLICITANTE + '&idresponsavel=eq.' + idresponsavel + '&order=proximadata.asc', { headers: headers() });
       const data = await res.json();
       if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
       renderPendList(box, data);
@@ -440,7 +440,7 @@
     const box = el('listaSecretaria');
     box.innerHTML = '<div class="loading-report">Carregando…</div>';
     try {
-      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&idsecretaria=eq.' + idsecretaria + '&order=proximadata.asc', { headers: headers() });
+      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&idsolicitante=eq.' + MEU_ID_SOLICITANTE + '&idsecretaria=eq.' + idsecretaria + '&order=proximadata.asc', { headers: headers() });
       const data = await res.json();
       if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
       renderPendList(box, data);
@@ -455,7 +455,7 @@
     search.placeholder = 'Carregando…';
     el('listaPorPauta').innerHTML = '';
     try {
-      const res = await fetch(state.url + '/rest/v1/pretopauta?select=idpauta,pautanome&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&order=pautanome.asc', { headers: headers() });
+      const res = await fetch(state.url + '/rest/v1/pretopauta?select=idpauta,pautanome&idsolicitante=eq.' + MEU_ID_SOLICITANTE + '&order=pautanome.asc', { headers: headers() });
       const data = await res.json();
       if (!res.ok) { handleApiError('relatorio', data); search.placeholder = 'Erro ao carregar'; return; }
       state.pautasBuscaCache = data.map(p => ({ id: p.idpauta, label: p.pautanome, searchText: p.pautanome.toLowerCase() }));
@@ -539,7 +539,7 @@
     search.placeholder = 'Carregando subpautas…';
     el('listaHistorico').innerHTML = '';
     try {
-      const res = await fetch(state.url + '/rest/v1/pretosubpauta?select=idsubpauta,subpautanome,concluido,subpautadatasolicitacao,subpautahorasolicitacao,criadopor,pretopauta!inner(pautanome,idsolicitante,avisarpreto),pretoresponsavel(respnome,pretosecretaria(secretarianome)),pretogrupowhats(nome)&or=(pretopauta.idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',pretopauta.avisarpreto.eq.true)&order=subpautanome.asc', { headers: headers() });
+      const res = await fetch(state.url + '/rest/v1/pretosubpauta?select=idsubpauta,subpautanome,concluido,subpautadatasolicitacao,subpautahorasolicitacao,criadopor,pretopauta!inner(pautanome,idsolicitante),pretoresponsavel(respnome,pretosecretaria(secretarianome)),pretogrupowhats(nome)&pretopauta.idsolicitante=eq.' + MEU_ID_SOLICITANTE + '&order=subpautanome.asc', { headers: headers() });
       const data = await res.json();
       if (!res.ok) { handleApiError('relatorio', data); search.placeholder = 'Erro ao carregar'; return; }
       state.historicoCache = data.map(s => {
