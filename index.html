@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Consulta de Pautas</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pautas">
+<meta name="theme-color" content="#101B34">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root {
+    --navy: #101B34;
+    --navy-light: #1B2A4D;
+    --gold: #C9A227;
+    --bg: #F4F5F7;
+    --card: #FFFFFF;
+    --text: #1F2430;
+    --text-dim: #6B7280;
+    --border: #E3E5EA;
+    --danger: #B3261E;
+    --success: #1E7A46;
+    --warn-bg: #FFF7E0;
+    --warn-border: #E9C566;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 40px;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) 18px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  header h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px;
+    margin: 0;
+    font-weight: 400;
+  }
+  header .sub { font-size: 11.5px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+  .badge-count {
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+  }
+  .badge-count.zero { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); }
+
+  main { padding: 14px; max-width: 640px; margin: 0 auto; }
+
+  .filtros { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+  .filtro-chip {
+    flex: none;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .filtro-chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+  .item-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .item-card.pendente { border-left: 4px solid var(--gold); }
+  .item-card.sem-prazo { border-left-color: var(--danger); }
+
+  .item-trilha { font-size: 11.5px; color: var(--text-dim); margin-bottom: 6px; }
+  .item-trilha b { color: var(--text); }
+  .item-desc { font-size: 14.5px; line-height: 1.4; margin-bottom: 8px; }
+  .item-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
+  .item-meta .prazo-tag {
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    color: #7A5C00;
+    font-weight: 600;
+  }
+  .item-meta .prazo-tag.sem-prazo { background: #FBE9E7; border-color: #E8ADA5; color: var(--danger); }
+  .item-meta .prazo-tag.vencido { background: #FBE9E7; border-color: #E8ADA5; color: var(--danger); }
+  .item-meta .resp-tag { padding: 3px 9px; border-radius: 999px; background: var(--bg); }
+
+  .item-actions { display: flex; justify-content: flex-end; }
+  .btn-revisar {
+    border: none;
+    background: var(--navy);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .btn-revisar:disabled { opacity: 0.5; }
+  .btn-revisar.ok { background: var(--success); }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+  .loading { text-align: center; padding: 40px; color: var(--text-dim); font-size: 14px; }
+
+  .refresh-hint { text-align: center; font-size: 11.5px; color: var(--text-dim); margin-top: 18px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Consulta de Pautas</h1>
+    <div class="sub" id="headerSub">Carregando…</div>
+  </div>
+  <div class="badge-count zero" id="badgeCount">0</div>
+</header>
+
+<main>
+  <div class="filtros">
+    <button type="button" class="filtro-chip active" data-filtro="pendentes" onclick="mudarFiltro('pendentes')">Não revisadas</button>
+    <button type="button" class="filtro-chip" data-filtro="todas" onclick="mudarFiltro('todas')">Todas</button>
+  </div>
+
+  <div id="lista"><div class="loading">Carregando pautas…</div></div>
+  <div class="refresh-hint">Puxe a tela pra baixo ou reabra o app pra atualizar.</div>
+</main>
+
+<script>
+  const state = {
+    url: 'https://gqgxekjcmnostlxgfvlg.supabase.co',
+    key: 'sb_publishable_UBuz0ZvBKbFmGR9JCNCwEw_nlo4xIDc',
+    filtro: 'pendentes',
+    itens: [],
+  };
+
+  function headers(extra) {
+    const h = { 'apikey': state.key };
+    if (state.key.startsWith('eyJ')) { h['Authorization'] = 'Bearer ' + state.key; }
+    return Object.assign(h, extra || {});
+  }
+
+  function el(id) { return document.getElementById(id); }
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function formatDateBR(s) {
+    if (!s) return null;
+    const iso = String(s).slice(0, 10);
+    const p = iso.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function diasAte(s) {
+    if (!s) return null;
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const alvo = new Date(String(s).slice(0, 10) + 'T00:00:00');
+    return Math.round((alvo.getTime() - hoje.getTime()) / 86400000);
+  }
+
+  function prazoLabel(proximadata) {
+    if (!proximadata) return { txt: 'Sem prazo definido', classe: 'sem-prazo' };
+    const dias = diasAte(proximadata);
+    const dataBR = formatDateBR(proximadata);
+    if (dias < 0) return { txt: 'Venceu em ' + dataBR + ' (' + Math.abs(dias) + 'd atrás)', classe: 'vencido' };
+    if (dias === 0) return { txt: 'Prazo hoje (' + dataBR + ')', classe: 'vencido' };
+    if (dias === 1) return { txt: 'Prazo amanhã (' + dataBR + ')', classe: '' };
+    return { txt: 'Prazo em ' + dias + ' dias (' + dataBR + ')', classe: '' };
+  }
+
+  async function carregar() {
+    el('lista').innerHTML = '<div class="loading">Carregando pautas…</div>';
+    try {
+      const res = await fetch(
+        state.url + '/rest/v1/pretovw_subpauta_pendente?select=*',
+        { headers: headers() }
+      );
+      if (!res.ok) {
+        el('lista').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div>Não foi possível carregar. Verifique a conexão.</div>';
+        el('headerSub').textContent = 'Erro ao carregar';
+        return;
+      }
+      const dados = await res.json();
+      // Ordena aqui (não no banco) pra garantir: sem prazo primeiro, depois prazo mais próximo primeiro.
+      dados.sort((a, b) => {
+        if (!a.proximadata && !b.proximadata) return 0;
+        if (!a.proximadata) return -1;
+        if (!b.proximadata) return 1;
+        return new Date(a.proximadata) - new Date(b.proximadata);
+      });
+      state.itens = dados;
+      renderTudo();
+    } catch (e) {
+      el('lista').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div>Falha de conexão: ' + escapeHtml(e.message) + '</div>';
+      el('headerSub').textContent = 'Sem conexão';
+    }
+  }
+
+  function renderTudo() {
+    const naoRevisadas = state.itens.filter(it => !it.revisadopreto);
+    el('badgeCount').textContent = naoRevisadas.length;
+    el('badgeCount').classList.toggle('zero', naoRevisadas.length === 0);
+    el('headerSub').textContent = naoRevisadas.length
+      ? naoRevisadas.length + ' pendente' + (naoRevisadas.length === 1 ? '' : 's') + ' de revisão'
+      : 'Tudo revisado';
+    renderLista();
+  }
+
+  function mudarFiltro(f) {
+    state.filtro = f;
+    document.querySelectorAll('.filtro-chip').forEach(c => c.classList.toggle('active', c.dataset.filtro === f));
+    renderLista();
+  }
+
+  function renderLista() {
+    const box = el('lista');
+    let itens = state.filtro === 'pendentes' ? state.itens.filter(it => !it.revisadopreto) : state.itens.slice();
+
+    if (!itens.length) {
+      box.innerHTML = '<div class="empty-state"><div class="icon">✅</div>' +
+        (state.filtro === 'pendentes' ? 'Nenhuma pendência no momento.' : 'Nenhuma pauta encontrada.') +
+        '</div>';
+      return;
+    }
+
+    box.innerHTML = itens.map(it => {
+      const prazo = prazoLabel(it.proximadata);
+      const revisado = !!it.revisadopreto;
+      return '<div class="item-card ' + (revisado ? '' : 'pendente') + (prazo.classe === 'sem-prazo' ? ' sem-prazo' : '') + '">' +
+        '<div class="item-trilha"><b>' + escapeHtml(it.pautanome || '(sem pauta)') + '</b>' +
+          (it.subpautanome ? ' → ' + escapeHtml(it.subpautanome) : '') +
+        '</div>' +
+        '<div class="item-desc">' + escapeHtml(it.descritivo || '(sem descrição)') + '</div>' +
+        '<div class="item-meta">' +
+          '<span class="prazo-tag ' + prazo.classe + '">' + escapeHtml(prazo.txt) + '</span>' +
+          (it.secretarianome ? '<span class="resp-tag">' + escapeHtml(it.secretarianome) + '</span>' : '') +
+          (it.respnome ? '<span class="resp-tag">Resp.: ' + escapeHtml(it.respnome) + '</span>' : '') +
+        '</div>' +
+        '<div class="item-actions">' +
+          (revisado
+            ? '<button type="button" class="btn-revisar ok" disabled>✓ Revisado</button>'
+            : '<button type="button" class="btn-revisar" onclick="marcarRevisado(' + it.idocorrencia + ', this)">Marcar como revisado</button>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function marcarRevisado(idocorrencia, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Salvando…';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretoocorrencia?idocorrencia=eq.' + idocorrencia, {
+        method: 'PATCH',
+        headers: headers({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ revisadopreto: true }),
+      });
+      if (!res.ok) {
+        btn.disabled = false;
+        btn.textContent = 'Tentar novamente';
+        return;
+      }
+      const item = state.itens.find(it => it.idocorrencia === idocorrencia);
+      if (item) item.revisadopreto = true;
+      renderTudo();
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Tentar novamente';
+    }
+  }
+
+  carregar();
+  // Recarrega automaticamente quando o app volta a ficar visível (ex: reaberto pelo ícone)
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar(); });
+</script>
+</body>
+</html>
