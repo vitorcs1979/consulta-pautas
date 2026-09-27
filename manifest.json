@@ -1,7 +1,7 @@
 {
-  "name": "Consulta de Pautas",
-  "short_name": "Pautas",
-  "description": "Consulta de pautas, subpautas e ocorrências pendentes de revisão.",
+  "name": "Relatórios do Preto",
+  "short_name": "Relatórios",
+  "description": "Relatórios de pendências, histórico e novidades do Sistema de Pautas.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#F4F5F7",

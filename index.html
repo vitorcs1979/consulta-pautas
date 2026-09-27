@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Consulta de Pautas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Relatórios — Preto</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pautas">
+<meta name="apple-mobile-web-app-title" content="Relatórios">
 <meta name="theme-color" content="#101B34">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -22,140 +22,190 @@
     --border: #E3E5EA;
     --danger: #B3261E;
     --success: #1E7A46;
-    --warn-bg: #FFF7E0;
-    --warn-border: #E9C566;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; }
   body {
+    margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
     padding-bottom: 40px;
   }
-  header {
-    background: var(--navy);
-    color: #fff;
-    padding: calc(env(safe-area-inset-top, 0px) + 16px) 18px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
-  header h1 {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 18px;
-    margin: 0;
-    font-weight: 400;
-  }
-  header .sub { font-size: 11.5px; color: rgba(255,255,255,0.65); margin-top: 2px; }
-  .badge-count {
-    background: var(--gold);
-    color: var(--navy);
-    font-weight: 700;
-    font-size: 13px;
-    min-width: 26px;
-    height: 26px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 8px;
-  }
-  .badge-count.zero { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); }
+  h1, h2 { font-family: Georgia, "Times New Roman", serif; margin: 0; }
 
-  main { padding: 14px; max-width: 640px; margin: 0 auto; }
+  header.top {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--navy); color: #E8EAF0;
+    padding: 16px 16px 0;
+  }
+  .top-title { font-family: Georgia, serif; font-size: 19px; }
+  .top-sub { font-size: 11.5px; color: rgba(232,234,240,0.6); margin-top: 2px; margin-bottom: 14px; }
 
-  .filtros { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
-  .filtro-chip {
-    flex: none;
-    padding: 7px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    font-size: 13px;
-    color: var(--text-dim);
+  .report-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .report-tabs::-webkit-scrollbar { display: none; }
+  .report-tab {
+    flex-shrink: 0; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06); font-size: 13px; font-weight: 600; cursor: pointer; color: rgba(232,234,240,0.75);
     white-space: nowrap;
   }
-  .filtro-chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .report-tab.active { background: var(--gold); color: #1F2430; border-color: var(--gold); }
 
-  .item-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
+  .main { padding: 18px 16px; max-width: 640px; margin: 0 auto; }
+  .report-panel { display: none; }
+  .report-panel.active { display: block; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin-bottom: 14px; font-family: -apple-system, sans-serif; font-weight: 600; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; position: relative; margin-bottom: 4px; }
+  .field label { font-size: 12.5px; color: var(--text-dim); font-weight: 600; }
+  .field input, .field select { padding: 11px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; color: var(--text); background: #fff; width: 100%; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(16,27,52,0.08); }
+
+  .autocomplete-wrap { position: relative; }
+  .autocomplete-results {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    max-height: 240px; overflow-y: auto; z-index: 20; box-shadow: 0 6px 16px rgba(0,0,0,0.10);
   }
-  .item-card.pendente { border-left: 4px solid var(--gold); }
-  .item-card.sem-prazo { border-left-color: var(--danger); }
+  .autocomplete-results.show { display: block; }
+  .autocomplete-item { padding: 11px 12px; font-size: 14px; cursor: pointer; }
+  .autocomplete-item:active { background: var(--bg); }
+  .autocomplete-empty { padding: 11px 12px; font-size: 13px; color: var(--text-dim); }
 
-  .item-trilha { font-size: 11.5px; color: var(--text-dim); margin-bottom: 6px; }
-  .item-trilha b { color: var(--text); }
-  .item-desc { font-size: 14.5px; line-height: 1.4; margin-bottom: 8px; }
-  .item-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
-  .item-meta .prazo-tag {
-    padding: 3px 9px;
-    border-radius: 999px;
-    background: var(--warn-bg);
-    border: 1px solid var(--warn-border);
-    color: #7A5C00;
-    font-weight: 600;
-  }
-  .item-meta .prazo-tag.sem-prazo { background: #FBE9E7; border-color: #E8ADA5; color: var(--danger); }
-  .item-meta .prazo-tag.vencido { background: #FBE9E7; border-color: #E8ADA5; color: var(--danger); }
-  .item-meta .resp-tag { padding: 3px 9px; border-radius: 999px; background: var(--bg); }
+  .btn { padding: 10px 16px; border-radius: 8px; border: none; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
 
-  .item-actions { display: flex; justify-content: flex-end; }
-  .btn-revisar {
-    border: none;
-    background: var(--navy);
-    color: #fff;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    font-weight: 600;
-  }
-  .btn-revisar:disabled { opacity: 0.5; }
-  .btn-revisar.ok { background: var(--success); }
+  .banner { padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; display: none; }
+  .banner.show { display: block; }
+  .banner-error { background: #FDEDEC; color: #922B21; border: 1px solid #F5C6C2; }
+  .banner-success { background: #EAF7EF; color: #1E7A46; border: 1px solid #BFE6CC; }
+  .banner-warn { background: #FFF8E6; color: #8A6516; border: 1px solid #F0DFA6; }
 
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .pend-item { display: flex; flex-direction: column; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .pend-item:last-child { border-bottom: none; }
+  .pend-title { font-weight: 600; font-size: 14.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pend-sub { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+  .pend-desc { font-size: 13.5px; margin-top: 6px; color: var(--text); line-height: 1.4; }
+  .pend-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; display: inline-block; }
+  .badge-atrasada { background: #FDEDEC; color: #922B21; }
+  .badge-hoje { background: #FFF8E6; color: #8A6516; }
+  .badge-ok { background: #EAF7EF; color: #1E7A46; }
+  .pend-num { display: inline-block; font-size: 11px; font-family: ui-monospace, monospace; background: var(--bg); color: var(--text-dim); padding: 2px 6px; border-radius: 4px; }
+  .pend-num-concluida { background: #EAF7EF; color: #1E7A46; }
+  .pend-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pend-actions .btn { flex: 1 1 auto; min-width: 96px; }
+  .pend-actions .btn-ghost { border-color: var(--danger); color: var(--danger); }
+  .empty-report { padding: 24px 4px; text-align: center; color: var(--text-dim); font-size: 14px; }
+  .loading-report { padding: 24px 4px; text-align: center; color: var(--text-dim); font-size: 14px; }
 
-  .loading { text-align: center; padding: 40px; color: var(--text-dim); font-size: 14px; }
-
-  .refresh-hint { text-align: center; font-size: 11.5px; color: var(--text-dim); margin-top: 18px; }
+  .pending-header { background: var(--bg); border: 1px dashed var(--border); }
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>Consulta de Pautas</h1>
-    <div class="sub" id="headerSub">Carregando…</div>
+<header class="top">
+  <div class="top-title">Relatórios — Preto</div>
+  <div class="top-sub">Consulta de pendências e histórico do Sistema de Pautas</div>
+  <div class="report-tabs">
+    <button class="report-tab active" data-report="geral" onclick="switchReport('geral')">Pendências Gerais</button>
+    <button class="report-tab" data-report="responsavel" onclick="switchReport('responsavel')">Por Responsável</button>
+    <button class="report-tab" data-report="secretaria" onclick="switchReport('secretaria')">Por Secretaria</button>
+    <button class="report-tab" data-report="historico" onclick="switchReport('historico')">Histórico</button>
+    <button class="report-tab" data-report="porpauta" onclick="switchReport('porpauta')">Por Pauta</button>
+    <button class="report-tab" data-report="minhas" onclick="switchReport('minhas')">Novidades</button>
   </div>
-  <div class="badge-count zero" id="badgeCount">0</div>
 </header>
 
-<main>
-  <div class="filtros">
-    <button type="button" class="filtro-chip active" data-filtro="pendentes" onclick="mudarFiltro('pendentes')">Não revisadas</button>
-    <button type="button" class="filtro-chip" data-filtro="todas" onclick="mudarFiltro('todas')">Todas</button>
+<div class="main">
+  <div id="banner-relatorio" class="banner"></div>
+
+  <div id="report-geral" class="report-panel active">
+    <div class="card">
+      <h2>Atrasadas e que vencem hoje</h2>
+      <div id="listaGeral"></div>
+    </div>
   </div>
 
-  <div id="lista"><div class="loading">Carregando pautas…</div></div>
-  <div class="refresh-hint">Puxe a tela pra baixo ou reabra o app pra atualizar.</div>
-</main>
+  <div id="report-responsavel" class="report-panel">
+    <div class="card">
+      <h2>Pendências por Responsável</h2>
+      <div class="field autocomplete-wrap">
+        <label>Responsável</label>
+        <input id="repRespSearch" type="text" placeholder="Digite para buscar…" autocomplete="off">
+        <input type="hidden" id="repResp" value="">
+        <div id="repRespResults" class="autocomplete-results"></div>
+      </div>
+      <div id="listaResponsavel" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <div id="report-secretaria" class="report-panel">
+    <div class="card">
+      <h2>Pendências por Secretaria</h2>
+      <div class="field">
+        <label>Secretaria</label>
+        <select id="repSecretaria"><option value="">Carregando…</option></select>
+      </div>
+      <div id="listaSecretaria" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <div id="report-historico" class="report-panel">
+    <div class="card">
+      <h2>Histórico completo de uma Subpauta</h2>
+      <div class="field autocomplete-wrap">
+        <label>Subpauta</label>
+        <input id="repSubSearch" type="text" placeholder="Digite para buscar…" autocomplete="off">
+        <input type="hidden" id="repSub" value="">
+        <div id="repSubResults" class="autocomplete-results"></div>
+      </div>
+      <div id="listaHistorico" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <div id="report-porpauta" class="report-panel">
+    <div class="card">
+      <h2>Ver uma Pauta completa</h2>
+      <p style="font-size:13px; color:var(--text-dim); margin-bottom:14px;">Busque uma Pauta que você acompanha e veja todas as Subpautas dela (abertas e concluídas), com o último andamento de cada uma.</p>
+      <div class="field autocomplete-wrap">
+        <label>Pauta</label>
+        <input id="repPautaSearch" type="text" placeholder="Digite para buscar…" autocomplete="off">
+        <input type="hidden" id="repPauta" value="">
+        <div id="repPautaResults" class="autocomplete-results"></div>
+      </div>
+      <div id="listaPorPauta" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <div id="report-minhas" class="report-panel">
+    <div class="card">
+      <h2>Novidades</h2>
+      <p style="font-size:13px; color:var(--text-dim); margin-bottom:14px;">Atualizações feitas por outras pessoas (ex: pelo zabot) nas pautas que você acompanha, que você ainda não marcou como lidas.</p>
+      <div id="listaMinhasPendencias"></div>
+    </div>
+  </div>
+</div>
 
 <script>
+  /* ============ CONFIGURAÇÃO DESTA PÁGINA ============ */
+  const MEU_ID_SOLICITANTE = 2; // Preto, em pretosolicitante
+  const VITOR_ID_SOLICITANTE = 1; // Vitor, em pretosolicitante
+  const MEU_NOME = 'Preto';
+  /* ==================================================== */
+
   const state = {
     url: 'https://gqgxekjcmnostlxgfvlg.supabase.co',
     key: 'sb_publishable_UBuz0ZvBKbFmGR9JCNCwEw_nlo4xIDc',
-    filtro: 'pendentes',
-    itens: [],
+    responsaveisCache: [],
+    historicoCache: [],
+    pautasBuscaCache: [],
   };
+  const el = id => document.getElementById(id);
+
+  function showBanner(view, type, msg) { const b = el('banner-' + view); b.className = 'banner show banner-' + type; b.textContent = msg; }
+  function hideBanner(view) { el('banner-' + view).className = 'banner'; }
 
   function headers(extra) {
     const h = { 'apikey': state.key };
@@ -163,136 +213,502 @@
     return Object.assign(h, extra || {});
   }
 
-  function el(id) { return document.getElementById(id); }
-  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function handleApiError(view, data) {
+    const msg = (data && (data.message || data.hint)) || 'Erro desconhecido.';
+    const isRls = /row-level security|permission denied/i.test(msg);
+    showBanner(view, isRls ? 'warn' : 'error', (isRls ? 'O RLS está bloqueando a leitura. Detalhe: ' : 'Não foi possível carregar: ') + msg);
+  }
 
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function escapeAttr(s) { return String(s || '').replace(/"/g, '&quot;'); }
+
+  function isoDateOnly(s) { return String(s).slice(0, 10); }
   function formatDateBR(s) {
-    if (!s) return null;
-    const iso = String(s).slice(0, 10);
-    const p = iso.split('-');
+    const p = isoDateOnly(s).split('-');
     return p[2] + '/' + p[1] + '/' + p[0];
   }
-
-  function diasAte(s) {
-    if (!s) return null;
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const alvo = new Date(String(s).slice(0, 10) + 'T00:00:00');
-    return Math.round((alvo.getTime() - hoje.getTime()) / 86400000);
+  function todayISO() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
 
-  function prazoLabel(proximadata) {
-    if (!proximadata) return { txt: 'Sem prazo definido', classe: 'sem-prazo' };
-    const dias = diasAte(proximadata);
-    const dataBR = formatDateBR(proximadata);
-    if (dias < 0) return { txt: 'Venceu em ' + dataBR + ' (' + Math.abs(dias) + 'd atrás)', classe: 'vencido' };
-    if (dias === 0) return { txt: 'Prazo hoje (' + dataBR + ')', classe: 'vencido' };
-    if (dias === 1) return { txt: 'Prazo amanhã (' + dataBR + ')', classe: '' };
-    return { txt: 'Prazo em ' + dias + ' dias (' + dataBR + ')', classe: '' };
+  async function fetchResponsaveis() {
+    const res = await fetch(state.url + '/rest/v1/pretoresponsavel?select=idresponsavel,respnome,pretosecretaria(secretarianome)&order=respnome.asc', { headers: headers() });
+    const data = await res.json();
+    if (!res.ok) { const err = new Error('api'); err.data = data; throw err; }
+    return data.map(r => {
+      const sec = r.pretosecretaria ? r.pretosecretaria.secretarianome : '';
+      return { id: r.idresponsavel, label: sec ? (r.respnome + ' — ' + sec) : r.respnome };
+    });
   }
 
-  async function carregar() {
-    el('lista').innerHTML = '<div class="loading">Carregando pautas…</div>';
+  function renderAutocomplete(cache, filterText, boxEl) {
+    const f = filterText.trim().toLowerCase();
+    const matches = cache.filter(p => !f || p.searchText.includes(f)).slice(0, 30);
+    if (!matches.length) {
+      boxEl.innerHTML = '<div class="autocomplete-empty">Nenhum resultado encontrado</div>';
+    } else {
+      boxEl.innerHTML = matches.map(p =>
+        '<div class="autocomplete-item" data-id="' + p.id + '" data-label="' + escapeAttr(p.label) + '">' + escapeHtml(p.label) + '</div>'
+      ).join('');
+    }
+    boxEl.classList.add('show');
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.autocomplete-wrap')) {
+      document.querySelectorAll('.autocomplete-results.show').forEach(b => b.classList.remove('show'));
+    }
+    const btnUpdate = e.target.closest('.pend-update-btn');
+    if (btnUpdate) { irAtualizarSubpauta(btnUpdate.dataset.idsubpauta, btnUpdate.dataset.label); }
+    const btnConf = e.target.closest('.conferir-btn');
+    if (btnConf) { marcarConferido(btnConf.dataset.id, btnConf.dataset.campo); }
+    const btnHist = e.target.closest('.ver-historico-btn');
+    if (btnHist) { irVerHistorico(btnHist.dataset.idsubpauta, btnHist.dataset.label); }
+    const btnBaixa = e.target.closest('.dar-baixa-btn');
+    if (btnBaixa) { irDarBaixa(btnBaixa.dataset.idsubpauta, btnBaixa.dataset.label); }
+    const btnNaoAcompanhar = e.target.closest('.nao-acompanhar-btn');
+    if (btnNaoAcompanhar) { naoAcompanharPauta(btnNaoAcompanhar.dataset.idpauta, btnNaoAcompanhar.dataset.nome); }
+  });
+
+  // "Atualizar" leva para o formulário de nova ocorrência no preto.html (não existe aqui,
+  // então avisamos e copiamos o nome da subpauta para a área de transferência.
+  async function irAtualizarSubpauta(idsubpauta, label) {
+    try { await navigator.clipboard.writeText(label); } catch (e) { /* ignora */ }
+    alert('Para registrar um novo andamento em "' + label + '", abra o Sistema de Pautas completo (preto.html) no computador — o nome já foi copiado para você colar na busca.');
+  }
+  async function irDarBaixa(idsubpauta, label) {
+    try { await navigator.clipboard.writeText(label); } catch (e) { /* ignora */ }
+    alert('Para dar baixa em "' + label + '", abra o Sistema de Pautas completo (preto.html) no computador — o nome já foi copiado para você colar na busca.');
+  }
+
+  async function irVerHistorico(idsubpauta, label) {
+    switchReport('historico');
+    await loadHistoricoSubpautasCache();
+    el('repSub').value = String(idsubpauta);
+    el('repSubSearch').value = label;
+    loadHistoricoOcorrencias(idsubpauta);
+    document.querySelector('.main').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function naoAcompanharPauta(idpauta, nomePauta) {
+    if (!idpauta) return;
+    const confirmado = confirm('Parar de acompanhar "' + nomePauta + '"?\n\nEssa Pauta deixa de aparecer nos seus relatórios — o Vitor passa a ser quem acompanha o andamento dela.');
+    if (!confirmado) return;
     try {
-      const res = await fetch(
-        state.url + '/rest/v1/pretovw_subpauta_pendente?select=*',
-        { headers: headers() }
-      );
+      const res = await fetch(state.url + '/rest/v1/pretopauta?idpauta=eq.' + idpauta, {
+        method: 'PATCH',
+        headers: headers({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+        body: JSON.stringify({ idsolicitante: VITOR_ID_SOLICITANTE, avisarpreto: false }),
+      });
       if (!res.ok) {
-        el('lista').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div>Não foi possível carregar. Verifique a conexão.</div>';
-        el('headerSub').textContent = 'Erro ao carregar';
+        const data = await res.json().catch(() => ({}));
+        alert('Não foi possível concluir: ' + (data.message || 'erro desconhecido'));
         return;
       }
-      const dados = await res.json();
-      // Ordena aqui (não no banco) pra garantir: sem prazo primeiro, depois prazo mais próximo primeiro.
-      dados.sort((a, b) => {
-        if (!a.proximadata && !b.proximadata) return 0;
-        if (!a.proximadata) return -1;
-        if (!b.proximadata) return 1;
-        return new Date(a.proximadata) - new Date(b.proximadata);
-      });
-      state.itens = dados;
-      renderTudo();
+      const resSub = await fetch(state.url + '/rest/v1/pretosubpauta?select=idsubpauta&idpauta=eq.' + idpauta, { headers: headers() });
+      const subpautas = resSub.ok ? await resSub.json() : [];
+      if (subpautas.length) {
+        const ids = subpautas.map(s => s.idsubpauta).join(',');
+        await fetch(state.url + '/rest/v1/pretoocorrencia?idsubpauta=in.(' + ids + ')&revisadopreto=eq.false', {
+          method: 'PATCH',
+          headers: headers({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+          body: JSON.stringify({ revisadopreto: true }),
+        });
+      }
+      loadMinhasPendencias();
     } catch (e) {
-      el('lista').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div>Falha de conexão: ' + escapeHtml(e.message) + '</div>';
-      el('headerSub').textContent = 'Sem conexão';
+      alert('Falha de conexão: ' + e.message);
     }
   }
 
-  function renderTudo() {
-    const naoRevisadas = state.itens.filter(it => !it.revisadopreto);
-    el('badgeCount').textContent = naoRevisadas.length;
-    el('badgeCount').classList.toggle('zero', naoRevisadas.length === 0);
-    el('headerSub').textContent = naoRevisadas.length
-      ? naoRevisadas.length + ' pendente' + (naoRevisadas.length === 1 ? '' : 's') + ' de revisão'
-      : 'Tudo revisado';
-    renderLista();
-  }
-
-  function mudarFiltro(f) {
-    state.filtro = f;
-    document.querySelectorAll('.filtro-chip').forEach(c => c.classList.toggle('active', c.dataset.filtro === f));
-    renderLista();
-  }
-
-  function renderLista() {
-    const box = el('lista');
-    let itens = state.filtro === 'pendentes' ? state.itens.filter(it => !it.revisadopreto) : state.itens.slice();
-
-    if (!itens.length) {
-      box.innerHTML = '<div class="empty-state"><div class="icon">✅</div>' +
-        (state.filtro === 'pendentes' ? 'Nenhuma pendência no momento.' : 'Nenhuma pauta encontrada.') +
-        '</div>';
-      return;
+  async function marcarConferido(idocorrencia, campo) {
+    try {
+      const body = {}; body[campo] = true;
+      const res = await fetch(state.url + '/rest/v1/pretoocorrencia?idocorrencia=eq.' + idocorrencia, {
+        method: 'PATCH',
+        headers: headers({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showBanner('relatorio', 'error', 'Não foi possível marcar: ' + (data.message || ''));
+        return;
+      }
+      loadMinhasPendencias();
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
     }
+  }
 
-    box.innerHTML = itens.map(it => {
-      const prazo = prazoLabel(it.proximadata);
-      const revisado = !!it.revisadopreto;
-      return '<div class="item-card ' + (revisado ? '' : 'pendente') + (prazo.classe === 'sem-prazo' ? ' sem-prazo' : '') + '">' +
-        '<div class="item-trilha"><b>' + escapeHtml(it.pautanome || '(sem pauta)') + '</b>' +
-          (it.subpautanome ? ' → ' + escapeHtml(it.subpautanome) : '') +
+  function switchReport(report) {
+    document.querySelectorAll('.report-tab').forEach(t => t.classList.toggle('active', t.dataset.report === report));
+    document.querySelectorAll('.report-panel').forEach(p => p.classList.toggle('active', p.id === 'report-' + report));
+    if (report === 'geral') loadReportGeral();
+    if (report === 'responsavel') loadResponsaveisForReport();
+    if (report === 'secretaria') loadSecretariasForReport();
+    if (report === 'historico') loadHistoricoSubpautasCache();
+    if (report === 'porpauta') loadPautasParaBuscaCache();
+    if (report === 'minhas') loadMinhasPendencias();
+  }
+
+  function renderPendList(container, rows) {
+    if (!rows.length) { container.innerHTML = '<div class="empty-report">Nenhuma pendência encontrada.</div>'; return; }
+    const today = todayISO();
+    container.innerHTML = rows.map(r => {
+      const dISO = isoDateOnly(r.proximadata);
+      let badge = '<span class="pend-badge badge-ok">Em dia</span>';
+      if (dISO < today) badge = '<span class="pend-badge badge-atrasada">Atrasada</span>';
+      else if (dISO === today) badge = '<span class="pend-badge badge-hoje">Vence hoje</span>';
+      const dataFmt = formatDateBR(dISO);
+      return '<div class="pend-item">' +
+        '<div>' +
+          '<div class="pend-title">' + escapeHtml(r.pautanome || '') + badge + '<span class="pend-num">Nº ' + r.idocorrencia + '</span></div>' +
+          '<div class="pend-sub">' + escapeHtml(r.subpautanome) + ' — ' + escapeHtml(r.respnome || '') + ' — ' + escapeHtml(r.secretarianome || '') + '</div>' +
+          '<div class="pend-sub">Prazo: ' + dataFmt + '</div>' +
+          (r.descritivo ? '<div class="pend-desc">' + escapeHtml(r.descritivo) + '</div>' : '') +
         '</div>' +
-        '<div class="item-desc">' + escapeHtml(it.descritivo || '(sem descrição)') + '</div>' +
-        '<div class="item-meta">' +
-          '<span class="prazo-tag ' + prazo.classe + '">' + escapeHtml(prazo.txt) + '</span>' +
-          (it.secretarianome ? '<span class="resp-tag">' + escapeHtml(it.secretarianome) + '</span>' : '') +
-          (it.respnome ? '<span class="resp-tag">Resp.: ' + escapeHtml(it.respnome) + '</span>' : '') +
-        '</div>' +
-        '<div class="item-actions">' +
-          (revisado
-            ? '<button type="button" class="btn-revisar ok" disabled>✓ Revisado</button>'
-            : '<button type="button" class="btn-revisar" onclick="marcarRevisado(' + it.idocorrencia + ', this)">Marcar como revisado</button>') +
+        '<div class="pend-actions">' +
+          '<button class="btn btn-primary pend-update-btn" data-idsubpauta="' + r.idsubpauta + '" data-label="' + escapeAttr(r.subpautanome) + '">Atualizar</button>' +
+          '<button class="btn btn-primary dar-baixa-btn" data-idsubpauta="' + r.idsubpauta + '" data-label="' + escapeAttr(r.subpautanome) + '">Dar Baixa</button>' +
+          '<button class="btn btn-ghost ver-historico-btn" data-idsubpauta="' + r.idsubpauta + '" data-label="' + escapeAttr(r.subpautanome) + '">Histórico</button>' +
         '</div>' +
       '</div>';
     }).join('');
   }
 
-  async function marcarRevisado(idocorrencia, btn) {
-    btn.disabled = true;
-    btn.textContent = 'Salvando…';
+  async function loadReportGeral() {
+    const box = el('listaGeral');
+    box.innerHTML = '<div class="loading-report">Carregando…</div>';
     try {
-      const res = await fetch(state.url + '/rest/v1/pretoocorrencia?idocorrencia=eq.' + idocorrencia, {
-        method: 'PATCH',
-        headers: headers({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ revisadopreto: true }),
-      });
-      if (!res.ok) {
-        btn.disabled = false;
-        btn.textContent = 'Tentar novamente';
-        return;
-      }
-      const item = state.itens.find(it => it.idocorrencia === idocorrencia);
-      if (item) item.revisadopreto = true;
-      renderTudo();
+      const today = todayISO();
+      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&proximadata=lte.' + today + '&order=proximadata.asc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
+      renderPendList(box, data);
     } catch (e) {
-      btn.disabled = false;
-      btn.textContent = 'Tentar novamente';
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
     }
   }
 
-  carregar();
-  // Recarrega automaticamente quando o app volta a ficar visível (ex: reaberto pelo ícone)
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar(); });
+  async function loadResponsaveisForReport() {
+    const search = el('repRespSearch');
+    search.value = ''; el('repResp').value = '';
+    search.placeholder = 'Carregando…';
+    el('listaResponsavel').innerHTML = '';
+    try {
+      const items = await fetchResponsaveis();
+      state.responsaveisCache = items.map(i => ({ id: i.id, label: i.label, searchText: i.label.toLowerCase() }));
+      search.placeholder = state.responsaveisCache.length ? 'Digite para buscar…' : 'Nenhum responsável cadastrado ainda';
+    } catch (e) {
+      handleApiError('relatorio', e.data || {});
+      search.placeholder = 'Erro ao carregar';
+    }
+  }
+
+  async function loadReportResponsavel(idresponsavel) {
+    const box = el('listaResponsavel');
+    box.innerHTML = '<div class="loading-report">Carregando…</div>';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&idresponsavel=eq.' + idresponsavel + '&order=proximadata.asc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
+      renderPendList(box, data);
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+    }
+  }
+
+  async function loadSecretariasForReport() {
+    const sel = el('repSecretaria');
+    sel.innerHTML = '<option value="">Carregando…</option>';
+    el('listaSecretaria').innerHTML = '';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretosecretaria?select=idsecretaria,secretarianome&order=secretarianome.asc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); sel.innerHTML = '<option value="">Erro ao carregar</option>'; return; }
+      if (!data.length) { sel.innerHTML = '<option value="">Nenhuma secretaria cadastrada ainda</option>'; return; }
+      sel.innerHTML = '<option value="">Selecione uma secretaria…</option>' +
+        data.map(s => '<option value="' + s.idsecretaria + '">' + escapeHtml(s.secretarianome) + '</option>').join('');
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+      sel.innerHTML = '<option value="">Erro ao carregar</option>';
+    }
+  }
+
+  async function loadReportSecretaria(idsecretaria) {
+    const box = el('listaSecretaria');
+    box.innerHTML = '<div class="loading-report">Carregando…</div>';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretovw_subpauta_pendente?select=*&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&idsecretaria=eq.' + idsecretaria + '&order=proximadata.asc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
+      renderPendList(box, data);
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+    }
+  }
+
+  async function loadPautasParaBuscaCache() {
+    const search = el('repPautaSearch');
+    search.value = ''; el('repPauta').value = '';
+    search.placeholder = 'Carregando…';
+    el('listaPorPauta').innerHTML = '';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretopauta?select=idpauta,pautanome&or=(idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',avisarpreto.eq.true)&order=pautanome.asc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); search.placeholder = 'Erro ao carregar'; return; }
+      state.pautasBuscaCache = data.map(p => ({ id: p.idpauta, label: p.pautanome, searchText: p.pautanome.toLowerCase() }));
+      search.placeholder = state.pautasBuscaCache.length ? 'Digite para buscar…' : 'Nenhuma pauta cadastrada ainda';
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+      search.placeholder = 'Erro ao carregar';
+    }
+  }
+
+  el('repPautaSearch').addEventListener('input', () => {
+    el('repPauta').value = '';
+    renderAutocomplete(state.pautasBuscaCache, el('repPautaSearch').value, el('repPautaResults'));
+  });
+  el('repPautaSearch').addEventListener('focus', () => {
+    renderAutocomplete(state.pautasBuscaCache, el('repPautaSearch').value, el('repPautaResults'));
+  });
+  el('repPautaResults').addEventListener('click', (e) => {
+    const item = e.target.closest('.autocomplete-item[data-id]');
+    if (!item) return;
+    el('repPauta').value = item.dataset.id;
+    el('repPautaSearch').value = item.dataset.label;
+    el('repPautaResults').classList.remove('show');
+    loadPautaCompleta(item.dataset.id, item.dataset.label);
+  });
+
+  async function loadPautaCompleta(idpauta, pautaLabel) {
+    const box = el('listaPorPauta');
+    box.innerHTML = '<div class="loading-report">Carregando…</div>';
+    try {
+      const resSub = await fetch(state.url + '/rest/v1/pretosubpauta?select=idsubpauta,subpautanome,concluido,pretoresponsavel(respnome)&idpauta=eq.' + idpauta + '&order=subpautanome.asc', { headers: headers() });
+      const subpautas = await resSub.json();
+      if (!resSub.ok) { handleApiError('relatorio', subpautas); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
+      if (!subpautas.length) { box.innerHTML = '<div class="empty-report">Esta Pauta ainda não tem nenhuma Subpauta cadastrada.</div>'; return; }
+
+      const ids = subpautas.map(s => s.idsubpauta).join(',');
+      const resOcor = await fetch(state.url + '/rest/v1/pretoocorrencia?select=idsubpauta,descritivo,proximadata,ocordatacadastro&idsubpauta=in.(' + ids + ')&order=idocorrencia.desc', { headers: headers() });
+      const ocorrencias = resOcor.ok ? await resOcor.json() : [];
+      const ultimaPorSubpauta = {};
+      ocorrencias.forEach(o => { if (!ultimaPorSubpauta[o.idsubpauta]) ultimaPorSubpauta[o.idsubpauta] = o; });
+
+      const today = todayISO();
+      box.innerHTML = '<div class="pend-item pending-header"><div class="pend-title">' + escapeHtml(pautaLabel) + '</div></div>' +
+        subpautas.map(s => {
+          const ultima = ultimaPorSubpauta[s.idsubpauta];
+          let badge = '<span class="pend-badge badge-ok">Sem ocorrência</span>';
+          let dataFmt = '—';
+          if (s.concluido) {
+            badge = '<span class="pend-badge badge-ok">Concluída</span>';
+          } else if (ultima) {
+            const dISO = isoDateOnly(ultima.proximadata);
+            dataFmt = formatDateBR(dISO);
+            badge = '<span class="pend-badge badge-ok">Em dia</span>';
+            if (dISO < today) badge = '<span class="pend-badge badge-atrasada">Atrasada</span>';
+            else if (dISO === today) badge = '<span class="pend-badge badge-hoje">Vence hoje</span>';
+          }
+          const resp = s.pretoresponsavel ? s.pretoresponsavel.respnome : '';
+          const acoes = s.concluido ? '' :
+            '<button class="btn btn-primary pend-update-btn" data-idsubpauta="' + s.idsubpauta + '" data-label="' + escapeAttr(s.subpautanome) + '">Atualizar</button>' +
+            '<button class="btn btn-primary dar-baixa-btn" data-idsubpauta="' + s.idsubpauta + '" data-label="' + escapeAttr(s.subpautanome) + '">Dar Baixa</button>';
+          return '<div class="pend-item">' +
+            '<div>' +
+              '<div class="pend-title">' + escapeHtml(s.subpautanome) + badge + '</div>' +
+              '<div class="pend-sub">Responsável: ' + escapeHtml(resp) + ' · Prazo: ' + dataFmt + '</div>' +
+              '<div class="pend-desc">' + escapeHtml(ultima ? (ultima.descritivo || '(sem descrição)') : 'Nenhuma ocorrência lançada ainda.') + '</div>' +
+            '</div>' +
+            '<div class="pend-actions">' +
+              acoes +
+              '<button class="btn btn-ghost ver-historico-btn" data-idsubpauta="' + s.idsubpauta + '" data-label="' + escapeAttr(s.subpautanome) + '">Histórico</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+    }
+  }
+
+  async function loadHistoricoSubpautasCache() {
+    const search = el('repSubSearch');
+    search.value = ''; el('repSub').value = '';
+    search.placeholder = 'Carregando subpautas…';
+    el('listaHistorico').innerHTML = '';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretosubpauta?select=idsubpauta,subpautanome,concluido,subpautadatasolicitacao,subpautahorasolicitacao,criadopor,pretopauta!inner(pautanome,idsolicitante,avisarpreto),pretoresponsavel(respnome,pretosecretaria(secretarianome)),pretogrupowhats(nome)&or=(pretopauta.idsolicitante.eq.' + MEU_ID_SOLICITANTE + ',pretopauta.avisarpreto.eq.true)&order=subpautanome.asc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); search.placeholder = 'Erro ao carregar'; return; }
+      state.historicoCache = data.map(s => {
+        const pauta = s.pretopauta ? s.pretopauta.pautanome : '';
+        const label = pauta ? (s.subpautanome + ' — ' + pauta) : s.subpautanome;
+        return {
+          id: s.idsubpauta, label: label, searchText: label.toLowerCase(),
+          subpautanome: s.subpautanome, pautanome: pauta,
+          concluido: s.concluido,
+          criadopor: s.criadopor,
+          respnome: s.pretoresponsavel ? s.pretoresponsavel.respnome : '',
+          secretarianome: (s.pretoresponsavel && s.pretoresponsavel.pretosecretaria) ? s.pretoresponsavel.pretosecretaria.secretarianome : '',
+          grupoNome: s.pretogrupowhats ? s.pretogrupowhats.nome : '',
+          dataSolicitacao: s.subpautadatasolicitacao,
+          horaSolicitacao: s.subpautahorasolicitacao,
+        };
+      });
+      search.placeholder = state.historicoCache.length ? 'Digite para buscar…' : 'Nenhuma subpauta cadastrada ainda';
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+      search.placeholder = 'Erro ao carregar';
+    }
+  }
+
+  async function loadHistoricoOcorrencias(idsubpauta) {
+    const box = el('listaHistorico');
+    box.innerHTML = '<div class="loading-report">Carregando…</div>';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretoocorrencia?select=idocorrencia,descritivo,proximadata,ocordatacadastro,ocordataatualizacao,criadopor&idsubpauta=eq.' + idsubpauta + '&order=ocordatacadastro.asc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
+      renderHistorico(data);
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+    }
+  }
+
+  function renderHistorico(rows) {
+    const box = el('listaHistorico');
+    const match = state.historicoCache.find(s => String(s.id) === el('repSub').value);
+    let header = '';
+    if (match) {
+      const statusBadge = match.concluido ? '<span class="pend-badge badge-ok">Concluída</span>' : '<span class="pend-badge badge-hoje">Em andamento</span>';
+      let whatsInfo = '';
+      if (match.grupoNome || match.dataSolicitacao) {
+        const dSol = match.dataSolicitacao ? formatDateBR(match.dataSolicitacao) : '—';
+        const hSol = match.horaSolicitacao ? match.horaSolicitacao.slice(0, 5) : '—';
+        whatsInfo = '<div class="pend-sub" style="margin-top:4px;">📱 Solicitada via WhatsApp — Grupo: <strong>' + escapeHtml(match.grupoNome || '—') + '</strong> — enviada em ' + dSol + ' às ' + hSol + '</div>';
+      }
+      const acoes = match.concluido ? '' :
+        '<div class="pend-actions" style="margin-top:12px;">' +
+          '<button class="btn btn-primary pend-update-btn" data-idsubpauta="' + match.id + '" data-label="' + escapeAttr(match.label) + '">Atualizar</button>' +
+          '<button class="btn btn-primary dar-baixa-btn" data-idsubpauta="' + match.id + '" data-label="' + escapeAttr(match.label) + '">Dar Baixa</button>' +
+        '</div>';
+      const headerTitulo = match.pautanome ? (match.pautanome + ' — ' + match.subpautanome) : match.subpautanome;
+      const criadaPorInfo = match.criadopor ? '<div class="pend-sub" style="margin-top:4px;">Subpauta criada por: <strong>' + escapeHtml(match.criadopor) + '</strong></div>' : '';
+      header = '<div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border);">' +
+        '<div class="pend-title">' + escapeHtml(headerTitulo) + ' ' + statusBadge + '</div>' +
+        '<div class="pend-sub" style="margin-top:4px;">' + escapeHtml(match.respnome || '') + ' — ' + escapeHtml(match.secretarianome || '') + '</div>' +
+        criadaPorInfo +
+        whatsInfo +
+        acoes +
+      '</div>';
+    }
+    if (!rows.length) { box.innerHTML = header + '<div class="empty-report">Nenhuma ocorrência registrada ainda para esta subpauta.</div>'; return; }
+    const items = rows.map((r, idx) => {
+      const dCad = formatDateBR(r.ocordatacadastro);
+      const dProx = formatDateBR(r.proximadata);
+      const editada = r.ocordataatualizacao ? ' <span class="pend-num">editada</span>' : '';
+      const por = r.criadopor ? ' — por <strong>' + escapeHtml(r.criadopor) + '</strong>' : '';
+      return '<div class="pend-item">' +
+        '<div>' +
+          '<div class="pend-sub">#' + (idx + 1) + ' — registrada em ' + dCad + por + editada + '</div>' +
+          '<div class="pend-desc">' + escapeHtml(r.descritivo || '(sem descrição)') + '</div>' +
+          '<div class="pend-sub" style="margin-top:4px;">Prazo definido: ' + dProx + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    box.innerHTML = header + items;
+  }
+
+  el('repRespSearch').addEventListener('input', () => {
+    el('repResp').value = '';
+    renderAutocomplete(state.responsaveisCache, el('repRespSearch').value, el('repRespResults'));
+  });
+  el('repRespSearch').addEventListener('focus', () => {
+    renderAutocomplete(state.responsaveisCache, el('repRespSearch').value, el('repRespResults'));
+  });
+  el('repRespResults').addEventListener('click', (e) => {
+    const item = e.target.closest('.autocomplete-item[data-id]');
+    if (!item) return;
+    el('repResp').value = item.dataset.id;
+    el('repRespSearch').value = item.dataset.label;
+    el('repRespResults').classList.remove('show');
+    loadReportResponsavel(item.dataset.id);
+  });
+
+  el('repSecretaria').addEventListener('change', () => {
+    const id = el('repSecretaria').value;
+    if (id) loadReportSecretaria(id); else el('listaSecretaria').innerHTML = '';
+  });
+
+  el('repSubSearch').addEventListener('input', () => {
+    el('repSub').value = '';
+    renderAutocomplete(state.historicoCache, el('repSubSearch').value, el('repSubResults'));
+  });
+  el('repSubSearch').addEventListener('focus', () => {
+    renderAutocomplete(state.historicoCache, el('repSubSearch').value, el('repSubResults'));
+  });
+  el('repSubResults').addEventListener('click', (e) => {
+    const item = e.target.closest('.autocomplete-item[data-id]');
+    if (!item) return;
+    el('repSub').value = item.dataset.id;
+    el('repSubSearch').value = item.dataset.label;
+    el('repSubResults').classList.remove('show');
+    loadHistoricoOcorrencias(item.dataset.id);
+  });
+
+  function renderConferenciaList(container, rows, campo) {
+    if (!rows.length) { container.innerHTML = '<div class="empty-report">Nenhuma atualização pendente de conferência.</div>'; return; }
+    container.innerHTML = rows.map(r => {
+      const sub = r.pretosubpauta ? r.pretosubpauta.subpautanome : '';
+      const idpauta = (r.pretosubpauta && r.pretosubpauta.pretopauta) ? r.pretosubpauta.pretopauta.idpauta : '';
+      const pauta = (r.pretosubpauta && r.pretosubpauta.pretopauta) ? r.pretosubpauta.pretopauta.pautanome : '';
+      const concluido = r.pretosubpauta ? !!r.pretosubpauta.concluido : false;
+      const dReg = formatDateBR(r.ocordatacadastro);
+      const dProx = formatDateBR(r.proximadata);
+      const selo = concluido ? '<span class="pend-num pend-num-concluida">✓ Baixa dada</span>' : '';
+      const botoesAcao = concluido ? '' :
+        '<button class="btn btn-primary pend-update-btn" data-idsubpauta="' + r.idsubpauta + '" data-label="' + escapeAttr(sub) + '">Atualizar</button>' +
+        '<button class="btn btn-primary dar-baixa-btn" data-idsubpauta="' + r.idsubpauta + '" data-label="' + escapeAttr(sub) + '">Dar Baixa</button>';
+      return '<div class="pend-item">' +
+        '<div>' +
+          '<div class="pend-title">' + escapeHtml(pauta) + selo + '</div>' +
+          '<div class="pend-sub">' + escapeHtml(sub) + ' — registrada em ' + dReg + ' · Prazo: ' + dProx + '</div>' +
+          '<div class="pend-desc">' + escapeHtml(r.descritivo || '(sem descrição)') + '</div>' +
+        '</div>' +
+        '<div class="pend-actions">' +
+          botoesAcao +
+          '<button class="btn btn-ghost ver-historico-btn" data-idsubpauta="' + r.idsubpauta + '" data-label="' + escapeAttr(sub) + '">Histórico</button>' +
+          '<button class="btn btn-primary conferir-btn" data-id="' + r.idocorrencia + '" data-campo="' + campo + '">Marcar como conferido</button>' +
+          '<button class="btn btn-ghost nao-acompanhar-btn" data-idpauta="' + idpauta + '" data-nome="' + escapeAttr(pauta) + '">Não acompanhar</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function loadMinhasPendencias() {
+    const box = el('listaMinhasPendencias');
+    box.innerHTML = '<div class="loading-report">Carregando…</div>';
+    try {
+      const res = await fetch(state.url + '/rest/v1/pretoocorrencia?select=idocorrencia,idsubpauta,descritivo,proximadata,ocordatacadastro,pretosubpauta(subpautanome,concluido,pretopauta(idpauta,pautanome))&revisadopreto=eq.false&order=ocordatacadastro.desc', { headers: headers() });
+      const data = await res.json();
+      if (!res.ok) { handleApiError('relatorio', data); box.innerHTML = '<div class="empty-report">Erro ao carregar.</div>'; return; }
+      renderConferenciaList(box, data, 'revisadopreto');
+    } catch (e) {
+      showBanner('relatorio', 'error', 'Falha de conexão: ' + e.message);
+    }
+  }
+
+  // Recarrega a aba atual quando o app volta a ficar visível (ex: reabrindo pela tela de início).
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const activeTab = document.querySelector('.report-tab.active');
+      if (activeTab) switchReport(activeTab.dataset.report);
+    }
+  });
+
+  switchReport('geral');
 </script>
 </body>
 </html>
